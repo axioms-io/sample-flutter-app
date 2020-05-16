@@ -1,2 +1,2 @@
-# Axioms-Dart-Sample
-Axioms Dart Sample App
+# Axioms-Flutter-Sample
+Axioms Flutter Sample App
