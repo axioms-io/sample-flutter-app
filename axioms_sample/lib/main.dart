@@ -37,12 +37,16 @@ class HomePage extends StatelessWidget {
               children: <Widget>[
                 RaisedButton(
                   onPressed: () {},
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    side: BorderSide(color: Colors.white)
+                  ),
                   child: Text(
                     'LOGIN',
                     style: TextStyle(
                       fontFamily: 'Sen',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold
+                      fontSize: 30,
+                      fontWeight: FontWeight.w600
                     ),
                   ),
                 )
