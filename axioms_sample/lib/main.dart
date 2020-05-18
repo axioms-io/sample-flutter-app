@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() => runApp(
   MaterialApp(
@@ -6,6 +9,35 @@ void main() => runApp(
     home: HomePage(),
   )
 );
+
+class WebBrowser extends StatelessWidget {
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: RichText(
+          text: TextSpan(
+            text: 'Go Back!',
+            style: TextStyle (
+              color: Colors.white,
+              fontFamily: 'Nunito',
+              fontSize: 20,
+              fontWeight: FontWeight.bold
+            )
+          ),          
+        ),
+      ),
+      body: WebView(
+        initialUrl: 'https://developer.axioms.io/',
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (WebViewController controller) {
+          _controller.complete(controller);
+        },
+      ),
+    );
+  }
+}
 
 class HomePage extends StatelessWidget {
   @override
@@ -36,7 +68,12 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 RaisedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => WebBrowser())
+                    );
+                  },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     side: BorderSide(color: Colors.white)
