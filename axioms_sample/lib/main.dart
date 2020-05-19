@@ -78,12 +78,15 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.0),
                     side: BorderSide(color: Colors.white)
                   ),
-                  child: Text(
-                    'LOGIN',
-                    style: TextStyle(
-                      fontFamily: 'Sen',
-                      fontSize: 30,
-                      fontWeight: FontWeight.w600
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(7, 3, 7, 3),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold
+                      ),
                     ),
                   ),
                 )
