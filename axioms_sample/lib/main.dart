@@ -23,21 +23,53 @@ class UriLinks extends StatefulWidget {
 
 class UriState extends State with SingleTickerProviderStateMixin {
   StreamSubscription _sub;
+  String _latestLink = 'Unkown';
+  Uri _latestUri;
 
-  Future<Null> initUniLinks() async {
+  initUniLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
+    _sub = getUriLinksStream().listen((Uri uri) {
+      if (!mounted) return;
+      setState(() {
+        _latestUri = uri;
+        _latestLink = uri?.toString() ?? 'Unkown';
+      });
+    }, onError: (err) {
+      if (!mounted) return;
+      setState(() {
+        _latestUri = null;
+        _latestLink = 'Failed to get latest link: $err';
+      });
+    });
+
+    getUriLinksStream().listen((Uri uri) {
+      print('Got Uri: ${uri?.path} ${uri?.queryParametersAll}');
+    }, onError: (err) {
+      print('Got Error: $err');
+    });
+
+    Uri initialUri;
+    String initialLink;
     try {
-      String initialLink = await getInitialLink();
-      print("Some link");
+      initialUri = await getInitialUri();
+      print('initial uri: ${initialUri?.path}'
+          ' ${initialUri?.queryParametersAll}');
+      initialLink = initialUri?.toString();
     } on PlatformException {
-      print("Not Successful");
+      initialUri = null;
+      initialLink = 'Failed to get initial uri.';
+    } on FormatException {
+      initialUri = null;
+      initialLink = 'Bad parse the initial link as Uri.';
     }
 
-    _sub = getLinksStream().listen((String link) {
-      print("Recieved Link");
-    }, onError: (err) {
-      print("Error");
+    if (!mounted) return;
+
+    setState(() {
+      _latestUri = initialUri;
+      _latestLink = initialLink;
     });
+
   }
 
   @override
@@ -48,6 +80,7 @@ class UriState extends State with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
     return HomePage();
   }
 
