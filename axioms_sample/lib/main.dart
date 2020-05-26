@@ -21,7 +21,7 @@ class UriLinks extends StatefulWidget {
   UriState createState() => new UriState();
 }
 
-class UriState extends State with SingleTickerProviderStateMixin {
+class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   StreamSubscription _sub;
   String _latestLink = 'Unkown';
   Uri _latestUri;
@@ -81,7 +81,12 @@ class UriState extends State with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
-    return HomePage();
+
+    final queryList = Map.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+
+    print(queryList);
+
+    return HomePage(queryList);
   }
 
   @override
@@ -125,6 +130,9 @@ class WebBrowser extends StatelessWidget {
 }
 
 class HomePage extends StatelessWidget {
+  final queryList;
+
+  HomePage(this.queryList);
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +147,7 @@ class HomePage extends StatelessWidget {
               children: <Widget>[
                 RichText(
                   text: TextSpan(
-                    text: 'axioms',
+                    text: queryList['title'],
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Nunito',
@@ -167,7 +175,7 @@ class HomePage extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(7, 3, 7, 3),
                     child: Text(
-                      'Login',
+                      queryList['button'],
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 30,
