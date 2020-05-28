@@ -1,10 +1,10 @@
 import 'dart:async';
-// import 'dart:html';
-
+import 'dart:convert' as convert;
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:nanoid/nanoid.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart' show PlatformException;
 
@@ -72,9 +72,39 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
   }
 
+  fetchAuth() async {
+    HttpClient client = new HttpClient();
+    client.badCertificateCallback = ((X509Certificate cert, String host, int port) => true);
+    String url = 'https://sahil-deshmukh.us.uat.axioms.io/user/login';
+    HttpClientRequest request = await client.getUrl(Uri.parse(url));
+    HttpClientResponse response = await request.close();
+    // String reply = await response.transform(convert.utf8.decoder).join();
+    print(response.statusCode);
+    // var response = await http.get(url);
+    // if (response.statusCode == 200) {
+    //   var jsonResponse = convert.jsonDecode(response.body);
+    //   print(jsonResponse);
+    // } else {
+    //   print('Request Failed with status: ${response.statusCode}');
+    // }
+  }
+
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
+  static String host = 'https://sahil-deshmukh.us.uat.axioms.io/oauth2/authorize?';
+  static String response_type = 'code';
+  static String client_id = 'dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t';
+  static String redirect_uri = 'com.axioms.io://callback';
+  static String scope = 'openid+profile';
+  static String state = nanoid();
+  static String nonce = nanoid();
+
+  String finalLink = '${host}response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}&state=${state}&nonce=${nonce}';
+
   @override
   void initState() {
     initUniLinks();
+    // fetchAuth();
+    print(finalLink);
     super.initState();
   }
 
@@ -82,11 +112,16 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
 
-    final queryList = Map.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+    final Map<String, String> queryList = {};
+
+    if (queryParams != null) {
+      final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+      queryList.addAll(newList);
+    }
 
     print(queryList);
 
-    return HomePage(queryList);
+    return HomePage(queryList, finalLink);
   }
 
   @override
@@ -101,6 +136,10 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 }
 
 class WebBrowser extends StatelessWidget {
+  final authLink;
+
+  WebBrowser(this.authLink);
+
   final Completer<WebViewController> _controller = Completer<WebViewController>();
   @override
   Widget build(BuildContext context) {
@@ -119,7 +158,7 @@ class WebBrowser extends StatelessWidget {
         ),
       ),
       body: WebView(
-        initialUrl: 'https://developer.axioms.io/',
+        initialUrl: authLink,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController controller) {
           _controller.complete(controller);
@@ -131,8 +170,9 @@ class WebBrowser extends StatelessWidget {
 
 class HomePage extends StatelessWidget {
   final queryList;
+  final authLink;
 
-  HomePage(this.queryList);
+  HomePage(this.queryList, this.authLink);
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +187,7 @@ class HomePage extends StatelessWidget {
               children: <Widget>[
                 RichText(
                   text: TextSpan(
-                    text: queryList['title'],
+                    text: 'axioms',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Nunito',
@@ -165,7 +205,7 @@ class HomePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => WebBrowser())
+                      MaterialPageRoute(builder: (context) => WebBrowser(authLink))
                     );
                   },
                   shape: RoundedRectangleBorder(
@@ -175,7 +215,7 @@ class HomePage extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(7, 3, 7, 3),
                     child: Text(
-                      queryList['button'],
+                      'login',
                       style: TextStyle(
                         fontFamily: 'Nunito',
                         fontSize: 30,
