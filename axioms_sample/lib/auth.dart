@@ -7,7 +7,6 @@ class Auth {
   String login_scope;            
   String login_type;  
   String post_login_navigate;
-
-  
-
 }
+
+// Session Class
