@@ -91,24 +91,25 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   }
 
   static String host = 'https://sahil-deshmukh.us.uat.axioms.io/oauth2/authorize?';
-  static String response_type = 'code';
-  static String client_id = 'dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t';
-  static String redirect_uri = 'com.axioms.io://callback';
+  static String responseType = 'code';
+  static String clientId = 'dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t';
+  static String redirectUri = 'com.axioms.io://callback';
   static String scope = 'openid+profile';
   static String state = nanoid();
   static String nonce = nanoid();
   // static String challenge_verifier = nanoid();
 
-  String finalLink = '${host}response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}&state=${state}&nonce=${nonce}';
+  String finalLink = '${host}response_type=$responseType&client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&state=$state&nonce=$nonce';
 
   authenticate() async {
-    final callbackUrlScheme = 'com.axioms.io://callback';
+    final callbackUrlScheme = 'com.axioms.io';
     
     try {
       final result = await FlutterWebAuth.authenticate(url: finalLink, callbackUrlScheme: callbackUrlScheme);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => RedirectPage(result)));
       print('Result: $result');
     } on PlatformException catch (err) {
-      print('Error: $err');
+      print('============== Error: $err ==============');
     }
 
   }
@@ -123,14 +124,14 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
+    // final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
 
     final Map<String, String> queryList = {};
 
-    if (queryParams != null) {
-      final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
-      queryList.addAll(newList);
-    }
+    // if (queryParams != null) {
+    //   final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+    //   queryList.addAll(newList);
+    // }
 
     print(queryList);
 
@@ -146,6 +147,44 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+}
+
+class RedirectPage extends StatelessWidget {
+
+  final String results;
+
+  RedirectPage(this.results);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(1, 46, 102, 100),
+      body: Container(
+        child: Column (
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RichText(
+                  text: TextSpan(
+                    text: 'REDIRECTED!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Nunito',
+                      fontSize: 50,
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
 }
 
 class HomePage extends StatelessWidget {
