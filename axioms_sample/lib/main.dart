@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:nanoid/nanoid.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart' show PlatformException;
+import 'package:crypto/crypto.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 
 void main() => runApp(
   MaterialApp(
@@ -89,7 +90,6 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
     // }
   }
 
-  final Completer<WebViewController> _controller = Completer<WebViewController>();
   static String host = 'https://sahil-deshmukh.us.uat.axioms.io/oauth2/authorize?';
   static String response_type = 'code';
   static String client_id = 'dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t';
@@ -97,8 +97,21 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   static String scope = 'openid+profile';
   static String state = nanoid();
   static String nonce = nanoid();
+  // static String challenge_verifier = nanoid();
 
   String finalLink = '${host}response_type=${response_type}&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=${scope}&state=${state}&nonce=${nonce}';
+
+  authenticate() async {
+    final callbackUrlScheme = 'com.axioms.io://callback';
+    
+    try {
+      final result = await FlutterWebAuth.authenticate(url: finalLink, callbackUrlScheme: callbackUrlScheme);
+      print('Result: $result');
+    } on PlatformException catch (err) {
+      print('Error: $err');
+    }
+
+  }
 
   @override
   void initState() {
@@ -121,7 +134,7 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
     print(queryList);
 
-    return HomePage(queryList, finalLink);
+    return HomePage(queryList, finalLink, authenticate);
   }
 
   @override
@@ -135,44 +148,12 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
 }
 
-class WebBrowser extends StatelessWidget {
-  final authLink;
-
-  WebBrowser(this.authLink);
-
-  final Completer<WebViewController> _controller = Completer<WebViewController>();
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: RichText(
-          text: TextSpan(
-            text: 'Go Back!',
-            style: TextStyle (
-              color: Colors.white,
-              fontFamily: 'Nunito',
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            )
-          ),          
-        ),
-      ),
-      body: WebView(
-        initialUrl: authLink,
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController controller) {
-          _controller.complete(controller);
-        },
-      ),
-    );
-  }
-}
-
 class HomePage extends StatelessWidget {
   final queryList;
   final authLink;
+  final Function authenticate;
 
-  HomePage(this.queryList, this.authLink);
+  HomePage(this.queryList, this.authLink, this.authenticate);
 
   @override
   Widget build(BuildContext context) {
@@ -202,12 +183,7 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 RaisedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => WebBrowser(authLink))
-                    );
-                  },
+                  onPressed: authenticate,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     side: BorderSide(color: Colors.white)
