@@ -106,8 +106,17 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
     
     try {
       final result = await FlutterWebAuth.authenticate(url: finalLink, callbackUrlScheme: callbackUrlScheme);
+      final Uri resultUri = Uri.parse(result);
+      final queryParams = resultUri?.queryParametersAll?.entries?.toList();
+      final queryList = {};
+
+      if (queryParams != null) {
+        final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+        queryList.addAll(newList);
+      }
+
       Navigator.push(context, MaterialPageRoute(builder: (context) => RedirectPage(result)));
-      print('Result: $result');
+      print('Code: ${queryList['code']}');
     } on PlatformException catch (err) {
       print('============== Error: $err ==============');
     }
@@ -118,20 +127,20 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   void initState() {
     initUniLinks();
     // fetchAuth();
-    print(finalLink);
+    // print(finalLink);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
+    final queryParams = _latestUri?.queryParametersAll?.entries?.toList();
 
     final Map<String, String> queryList = {};
 
-    // if (queryParams != null) {
-    //   final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
-    //   queryList.addAll(newList);
-    // }
+    if (queryParams != null) {
+      final newList = Map?.fromIterable(queryParams, key: (v) => v.key, value: (v) => v.value[0]);
+      queryList.addAll(newList);
+    }
 
     print(queryList);
 
