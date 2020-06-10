@@ -1,13 +1,8 @@
 import 'dart:async';
-import 'dart:convert' as convert;
-import 'dart:io';
 import 'package:axioms_sample/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:nanoid/nanoid.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart' show PlatformException;
-import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'auth.dart';
 
