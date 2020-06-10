@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io';
+import 'package:axioms_sample/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nanoid/nanoid.dart';
@@ -8,6 +9,7 @@ import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'auth.dart';
 
 void main() => runApp(
   MaterialApp(
@@ -90,19 +92,17 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
     // }
   }
 
-  static String host = 'https://sahil-deshmukh.us.uat.axioms.io/oauth2/authorize?';
-  static String responseType = 'code';
-  static String clientId = 'dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t';
-  static String redirectUri = 'com.axioms.io://callback';
-  static String scope = 'openid+profile';
-  static String state = nanoid();
-  static String nonce = nanoid();
-  // static String challenge_verifier = nanoid();
-
-  String finalLink = '${host}response_type=$responseType&client_id=$clientId&redirect_uri=$redirectUri&scope=$scope&state=$state&nonce=$nonce';
+  Auth test = new Auth(
+    "sahil-deshmukh.us.uat.axioms.io", 
+    "code", 
+    "com.axioms.io://callback", 
+    "dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t", 
+    "openid+profile"
+  );
 
   authenticate() async {
     final callbackUrlScheme = 'com.axioms.io';
+    String finalLink = test.getUrl();
     
     try {
       final result = await FlutterWebAuth.authenticate(url: finalLink, callbackUrlScheme: callbackUrlScheme);
@@ -126,8 +126,8 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     initUniLinks();
-    // fetchAuth();
-    // print(finalLink);
+    print(test.getUrl());
+
     super.initState();
   }
 
@@ -144,7 +144,7 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
     print(queryList);
 
-    return HomePage(queryList, finalLink, authenticate);
+    return HomePage(queryList, test.getUrl(), authenticate);
   }
 
   @override
