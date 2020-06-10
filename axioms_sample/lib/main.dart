@@ -75,23 +75,6 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
   }
 
-  fetchAuth() async {
-    HttpClient client = new HttpClient();
-    client.badCertificateCallback = ((X509Certificate cert, String host, int port) => true);
-    String url = 'https://sahil-deshmukh.us.uat.axioms.io/user/login';
-    HttpClientRequest request = await client.getUrl(Uri.parse(url));
-    HttpClientResponse response = await request.close();
-    // String reply = await response.transform(convert.utf8.decoder).join();
-    print(response.statusCode);
-    // var response = await http.get(url);
-    // if (response.statusCode == 200) {
-    //   var jsonResponse = convert.jsonDecode(response.body);
-    //   print(jsonResponse);
-    // } else {
-    //   print('Request Failed with status: ${response.statusCode}');
-    // }
-  }
-
   Auth test = new Auth(
     "sahil-deshmukh.us.uat.axioms.io", 
     "code", 
