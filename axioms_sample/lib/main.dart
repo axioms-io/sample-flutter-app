@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert' as convert;
 import 'package:axioms_sample/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:http/http.dart' as http;
 import 'auth.dart';
 
 void main() => runApp(
@@ -70,7 +72,23 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
   }
 
-  Auth test = new Auth(
+  Future<http.Response> postTokenEndpoint(var queryParams) {
+    return http.post(
+      session.getTokenUrl(),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: convert.jsonEncode(<String, String>{
+        'code': queryParams['code'],
+        'client_id': "dZg5t2xFcEg0J8tYc0jpFGZoDQC7yL8t",
+        'code_verifier': 'NEED TO CHANGE',
+        'redirect_uri': "com.axioms.io://callback",
+        'grant_type': 'authorization_code'
+      }),
+    );
+  }
+
+  Auth session = new Auth(
     "sahil-deshmukh.us.uat.axioms.io", 
     "code", 
     "com.axioms.io://callback", 
@@ -80,7 +98,7 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
   authenticate() async {
     final callbackUrlScheme = 'com.axioms.io';
-    String finalLink = test.getUrl();
+    String finalLink = session.getAuthUrl();
     
     try {
       final result = await FlutterWebAuth.authenticate(url: finalLink, callbackUrlScheme: callbackUrlScheme);
@@ -93,8 +111,14 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
         queryList.addAll(newList);
       }
 
-      Navigator.push(context, MaterialPageRoute(builder: (context) => RedirectPage(result)));
-      print('Code: ${queryList['code']}');
+      String outcome = "Successs";
+
+      if (queryList['state'] != session.getState()) {
+        outcome = "Failure";
+      }
+      Navigator.push(context, MaterialPageRoute(builder: (context) => RedirectPage(outcome)));
+
+      print('State: ${queryList['state']}');
     } on PlatformException catch (err) {
       print('============== Error: $err ==============');
     }
@@ -104,7 +128,7 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     initUniLinks();
-    print(test.getUrl());
+    print(session.getAuthUrl());
 
     super.initState();
   }
@@ -122,7 +146,7 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
     print(queryList);
 
-    return HomePage(queryList, test.getUrl(), authenticate);
+    return HomePage(queryList, session.getAuthUrl(), authenticate);
   }
 
   @override
@@ -138,9 +162,9 @@ class UriState extends State<UriLinks> with SingleTickerProviderStateMixin {
 
 class RedirectPage extends StatelessWidget {
 
-  final String results;
+  final String outcome;
 
-  RedirectPage(this.results);
+  RedirectPage(this.outcome);
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +179,7 @@ class RedirectPage extends StatelessWidget {
               children: <Widget>[
                 RichText(
                   text: TextSpan(
-                    text: 'REDIRECTED!',
+                    text: outcome.toUpperCase(),
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Nunito',
