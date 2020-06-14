@@ -15,8 +15,12 @@ class Auth {
   String state;
   String challenge;
   String challenge_verifier;
-  String url;
+
+  String authUrl;
   String authPath = '/oauth2/authorize';
+
+  String tokenUrl;
+  String tokenPath = '/oauth2/token';
 
   Auth(String axioms_domain, String response_type, String redirect_uri, String client_id, String login_scope) {
     this.axioms_domain = axioms_domain;
@@ -26,14 +30,15 @@ class Auth {
     this.login_scope = login_scope;
     this.nonce = nanoid();
     this.state = nanoid();
-    buildUrl();
+    buildAuthUrl();
+    buildTokenUrl();
   }
 
   String getState() {
     return this.state;
   }
 
-  void buildUrl() {
+  void buildAuthUrl() {
     var queryParams = {
       "response_type": this.response_type,
       "client_id": this.client_id,
@@ -55,10 +60,20 @@ class Auth {
       }
       link += current;
     }
-    this.url = link;
+    this.authUrl = link;
   }
 
-  String getUrl() {
-    return this.url;
+  void buildTokenUrl(){ 
+    String link = "https://" + this.axioms_domain + tokenPath;
+    this.tokenUrl = link;
   }
+
+  String getAuthUrl() {
+    return this.authUrl;
+  }
+
+  String getTokenUrl() {
+    return this.tokenUrl;
+  }
+
 }
